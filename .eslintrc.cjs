@@ -31,5 +31,6 @@ module.exports = {
     'import/no-unresolved': 'off',
     'sort-imports': 'off',
     'import/order': ['error', { alphabetize: { order: 'asc' } }],
+    'import/named': 'off',
   },
 };
