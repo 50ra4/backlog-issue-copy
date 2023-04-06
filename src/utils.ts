@@ -4,14 +4,22 @@ type QueryParameterValue = PrimitiveValue | null | PrimitiveValue[];
 export type QueryParameter = Record<PropertyKey, QueryParameterValue>;
 
 export const object2queryString = <T extends QueryParameter>(obj: T) => {
-  const params = Object.entries(obj).reduce((acc, [key, value]) => {
-    if (value === null || typeof value === 'undefined') {
-      return acc;
-    }
-    acc.append(key, value.toString());
-    return acc;
-  }, new URLSearchParams());
+  const pairs: [string, string][] = [];
+  Object.entries(obj).forEach(([key, value]) => {
+    if (typeof value === 'undefined' || value === null) return;
 
-  params.sort();
-  return params.toString();
+    if (Array.isArray(value)) {
+      value.forEach((v) => {
+        if (typeof v === 'undefined') return;
+        pairs.push([`${key}[]`, v.toString()]);
+      });
+      return;
+    }
+
+    pairs.push([key, value.toString()]);
+  });
+
+  if (!pairs.length) return '';
+
+  return pairs.map(([key, value]) => `${key}=${value}`).join('&');
 };
