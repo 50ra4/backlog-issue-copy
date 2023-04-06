@@ -1,11 +1,14 @@
 import 'dotenv/config';
-import axios from 'axios';
+import { BacklogClient } from './backlog.js';
 
 const main = async () => {
   try {
-    const response = await axios.get(`${process.env.BASE_URL}type/3`, {});
-    console.log('result', response.data);
-    console.log('done!');
+    const backlogClient = new BacklogClient(
+      process.env.BASE_URL ?? '',
+      process.env.API_KEY ?? '',
+    );
+    const priorities = await backlogClient.getPriorities();
+    console.log('result', priorities);
     process.exit(0);
   } catch (error) {
     console.error(error);
