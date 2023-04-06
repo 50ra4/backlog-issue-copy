@@ -1,10 +1,5 @@
-type QueryParameterValue =
-  | string
-  | number
-  | boolean
-  | null
-  | undefined
-  | (string | number | boolean)[];
+type PrimitiveValue = string | number | boolean | undefined;
+type QueryParameterValue = PrimitiveValue | null | PrimitiveValue[];
 
 export type QueryParameter = Record<PropertyKey, QueryParameterValue>;
 
