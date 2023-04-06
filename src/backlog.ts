@@ -137,6 +137,28 @@ const BACKLOG_ISSUE_SAMPLE_RESPONSE = [
 
 type Issue = (typeof BACKLOG_ISSUE_SAMPLE_RESPONSE)[0];
 
+const PROJECT_SAMPLE_RESPONSE = {
+  id: 1,
+  projectKey: 'TEST',
+  name: 'test',
+  chartEnabled: false,
+  useResolvedForChart: false,
+  subtaskingEnabled: false,
+  projectLeaderCanEditProjectLeader: false,
+  useWiki: true,
+  useFileSharing: true,
+  useWikiTreeView: true,
+  useOriginalImageSizeAtWiki: false,
+  useSubversion: true,
+  useGit: true,
+  textFormattingRule: 'markdown',
+  archived: false,
+  displayOrder: 2147483646,
+  useDevAttributes: true,
+};
+
+type Project = typeof PROJECT_SAMPLE_RESPONSE;
+
 class ApiClient {
   private readonly client: AxiosInstance;
 
@@ -151,11 +173,25 @@ class ApiClient {
     url: string,
     query: T,
   ): Promise<R> {
-    const params = object2queryString({ ...query, apiKey: this.apiKey });
+    const params = object2queryString({ apiKey: this.apiKey, ...query });
     return this.client
       .get(`${url}?${params}`, {
         headers: {
           'Content-Type': 'application/json',
+        },
+      })
+      .then(({ data }) => data);
+  }
+
+  async post<R, T extends Record<PropertyKey, any> = any>(
+    url: string,
+    body: T,
+  ): Promise<R> {
+    const params = object2queryString({ apiKey: this.apiKey });
+    return this.client
+      .post(`${url}?${params}`, body, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded ',
         },
       })
       .then(({ data }) => data);
@@ -173,7 +209,14 @@ export class BacklogClient {
     this.apiClient = new ApiClient(baseUrl, apiKey);
   }
 
-  public async getIssues(query: {
+  public getProject(projectIdOrKey: string) {
+    return this.apiClient.get<Project>(
+      `/api/v2/projects/${projectIdOrKey}`,
+      {},
+    );
+  }
+
+  public getIssues(query: {
     projectId?: number[];
     issueTypeId?: number[];
     categoryId?: number[];
@@ -190,6 +233,21 @@ export class BacklogClient {
 
   public getIssue(issueIdOrKey: string) {
     return this.apiClient.get<Issue>(`/api/v2/issues/${issueIdOrKey}`, {});
+  }
+
+  public createIssue(body: {
+    projectId: number;
+    summary: string;
+    parentIssueId?: number;
+    description?: string;
+    startDate?: string;
+    dueDate?: string;
+    estimatedHours?: string;
+    actualHours?: string;
+    issueTypeId: number;
+    priorityId: number;
+  }) {
+    return this.apiClient.post<Issue>(`/api/v2/issues`, body);
   }
 
   public getPriorities() {
